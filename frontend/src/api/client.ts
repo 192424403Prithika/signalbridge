@@ -37,10 +37,17 @@ export async function apiRequest<T>(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
+  } catch (err: any) {
+    throw new Error(
+      'Could not reach the server. The free cloud server may be waking up from sleep (can take up to 40 seconds). Please try again in a few moments.'
+    );
+  }
 
   if (!response.ok) {
     let errorDetail = 'An unexpected error occurred';

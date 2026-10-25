@@ -8,6 +8,7 @@ if db_url.startswith("postgres://"):
 
 engine = create_engine(
     db_url,
+    pool_pre_ping=True,
     connect_args={"check_same_thread": False} if "sqlite" in db_url else {}
 )
 

@@ -13,7 +13,9 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        value: sqlite:///./signalbridge.db
+        fromDatabase:
+          name: signalbridge-db
+          property: connectionString
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "10080"
       - key: PYTHON_VERSION
@@ -38,3 +40,8 @@ services:
           name: signalbridge-backend
           property: host
 
+databases:
+  - name: signalbridge-db
+    plan: free
+    databaseName: signalbridge
+    user: signalbridge_user
