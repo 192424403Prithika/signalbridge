@@ -70,6 +70,22 @@ def generate_report(
     db.commit()
     db.refresh(report)
 
+    try:
+        from app.services.mongo_service import save_mongo_report
+        save_mongo_report({
+            "user_email": current_user.email,
+            "title": report.title,
+            "date_range_start": report.date_range_start,
+            "date_range_end": report.date_range_end,
+            "primary_concerns": report.primary_concerns,
+            "selected_sections_json": report.selected_sections_json,
+            "generated_content_json": report.generated_content_json,
+            "questions_for_clinician": report.questions_for_clinician,
+            "status": report.status
+        })
+    except Exception:
+        pass
+
     log_audit_event(db, current_user.id, "REPORT_GENERATED", "Report", report.id)
 
     return {

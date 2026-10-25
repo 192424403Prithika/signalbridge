@@ -31,6 +31,20 @@ def record_cycle(
     db.add(cycle)
     db.commit()
     db.refresh(cycle)
+
+    try:
+        from app.services.mongo_service import save_mongo_cycle
+        save_mongo_cycle({
+            "user_email": current_user.email,
+            "period_start_date": cycle.period_start_date,
+            "period_end_date": cycle.period_end_date,
+            "flow_intensity": cycle.flow_intensity,
+            "cycle_length": cycle.cycle_length,
+            "notes": cycle.notes
+        })
+    except Exception:
+        pass
+
     return cycle
 
 @router.delete("/{cycle_id}")
@@ -38,8 +52,16 @@ def delete_cycle(cycle_id: int, db: Session = Depends(get_db), current_user: Use
     c = db.query(Cycle).filter(Cycle.id == cycle_id, Cycle.user_id == current_user.id).first()
     if not c:
         raise HTTPException(status_code=404, detail="Cycle entry not found.")
+    period_start = c.period_start_date
     db.delete(c)
     db.commit()
+
+    try:
+        from app.services.mongo_service import delete_mongo_cycle
+        delete_mongo_cycle(current_user.email, period_start)
+    except Exception:
+        pass
+
     return {"message": "Cycle entry deleted."}
 
 @router.get("/prediction", response_model=CyclePrediction)

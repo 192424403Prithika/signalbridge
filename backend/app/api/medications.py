@@ -35,6 +35,24 @@ def add_medication(
     db.add(med)
     db.commit()
     db.refresh(med)
+
+    try:
+        from app.services.mongo_service import save_mongo_medication
+        save_mongo_medication({
+            "user_email": current_user.email,
+            "name": med.name,
+            "dosage": med.dosage,
+            "frequency": med.frequency,
+            "start_date": med.start_date,
+            "end_date": med.end_date,
+            "prescriber": med.prescriber,
+            "purpose": med.purpose,
+            "notes": med.notes,
+            "is_active": med.is_active
+        })
+    except Exception:
+        pass
+
     return med
 
 @router.put("/{med_id}", response_model=MedicationOut)
@@ -53,6 +71,24 @@ def update_medication(
 
     db.commit()
     db.refresh(med)
+
+    try:
+        from app.services.mongo_service import save_mongo_medication
+        save_mongo_medication({
+            "user_email": current_user.email,
+            "name": med.name,
+            "dosage": med.dosage,
+            "frequency": med.frequency,
+            "start_date": med.start_date,
+            "end_date": med.end_date,
+            "prescriber": med.prescriber,
+            "purpose": med.purpose,
+            "notes": med.notes,
+            "is_active": med.is_active
+        })
+    except Exception:
+        pass
+
     return med
 
 @router.delete("/{med_id}")
@@ -61,8 +97,16 @@ def delete_medication(med_id: int, db: Session = Depends(get_db), current_user: 
     if not med:
         raise HTTPException(status_code=404, detail="Medication not found.")
 
+    med_name = med.name
     db.delete(med)
     db.commit()
+
+    try:
+        from app.services.mongo_service import delete_mongo_medication
+        delete_mongo_medication(current_user.email, med_name)
+    except Exception:
+        pass
+
     return {"message": "Medication deleted."}
 
 @router.get("/logs", response_model=List[MedicationLogOut])

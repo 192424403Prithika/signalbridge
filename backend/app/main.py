@@ -17,8 +17,8 @@ async def lifespan(app: FastAPI):
     db = SessionLocal()
     try:
         seed_database(db)
-        from app.services.mongo_service import sync_all_mongo_users
-        sync_all_mongo_users(db)
+        from app.services.mongo_service import sync_all_mongo_data
+        sync_all_mongo_data(db)
     finally:
         db.close()
     yield

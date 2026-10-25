@@ -182,6 +182,31 @@ def create_entry(
     db.commit()
     db.refresh(entry)
 
+    try:
+        from app.services.mongo_service import save_mongo_entry
+        save_mongo_entry({
+            "user_email": current_user.email,
+            "symptom_name": symptom.name,
+            "symptom_category": symptom.category,
+            "onset_date": entry.onset_date,
+            "onset_time": entry.onset_time,
+            "end_date": entry.end_date,
+            "end_time": entry.end_time,
+            "duration_minutes": entry.duration_minutes,
+            "severity": entry.severity,
+            "body_location": entry.body_location,
+            "notes": entry.notes,
+            "source_type": entry.source_type,
+            "ai_extracted": entry.ai_extracted,
+            "user_confirmed": entry.user_confirmed,
+            "privacy_category": entry.privacy_category,
+            "cycle_phase": entry.cycle_phase,
+            "contexts": [{"context_type": c.context_type, "value": c.value, "notes": c.notes} for c in entry.contexts],
+            "tags": [t.name for t in entry.tags]
+        })
+    except Exception:
+        pass
+
     # Rescan data quality asynchronously or inline
     DataQualityEngine.scan_user_data(db, current_user.id)
     log_audit_event(db, current_user.id, "ENTRY_CREATED", "SymptomEntry", entry.id)
@@ -300,8 +325,18 @@ def delete_entry(entry_id: int, db: Session = Depends(get_db), current_user: Use
     if not entry:
         raise HTTPException(status_code=404, detail="Entry not found.")
 
+    onset_date = entry.onset_date
+    symptom_name = entry.symptom.name if entry.symptom else None
+
     db.delete(entry)
     db.commit()
+
+    try:
+        from app.services.mongo_service import delete_mongo_entry
+        delete_mongo_entry(current_user.email, entry_id, onset_date, symptom_name)
+    except Exception:
+        pass
+
     DataQualityEngine.scan_user_data(db, current_user.id)
     log_audit_event(db, current_user.id, "ENTRY_DELETED", "SymptomEntry", entry_id)
     return {"message": f"Entry {entry_id} deleted."}
