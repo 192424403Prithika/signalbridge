@@ -12,7 +12,7 @@ export const API_BASE_URL = rawApiUrl;
 const BASE_URL = `${API_BASE_URL}/api/v1`;
 
 export function getToken(): string | null {
-  return localStorage.getItem('signalbridge_token');
+  return localStorage.getItem('signalbridge_token') || sessionStorage.getItem('signalbridge_demo_token');
 }
 
 export function getExportUrl(path: string): string {

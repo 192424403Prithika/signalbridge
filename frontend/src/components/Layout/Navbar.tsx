@@ -30,18 +30,28 @@ export const Navbar: React.FC = () => {
     navigate('/');
   };
 
+  const showAuthNav = isAuthenticated && !(isDemo && location.pathname === '/');
+
   return (
     <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
-      {/* Top Demo Banner if in Demo account */}
-      {isDemo && (
-        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-1.5 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between">
-          <div className="max-w-7xl mx-auto flex items-center gap-2">
-            <span className="font-semibold uppercase tracking-wider bg-amber-200 dark:bg-amber-900/60 px-1.5 py-0.5 rounded text-[10px]">
-              Demo Mode
-            </span>
-            <span>
-              You are exploring a read-only demo account with 90 days of synthetic demonstration data.
-            </span>
+      {/* Top Demo Banner only when inside demo exploration and not on landing page */}
+      {isDemo && location.pathname !== '/' && (
+        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-1.5 text-xs text-amber-800 dark:text-amber-300">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold uppercase tracking-wider bg-amber-200 dark:bg-amber-900/60 px-1.5 py-0.5 rounded text-[10px]">
+                Demo Mode
+              </span>
+              <span>
+                You are exploring a read-only demo account with 90 days of synthetic demonstration data.
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-xs font-semibold px-2.5 py-0.5 rounded bg-amber-200/80 hover:bg-amber-300 dark:bg-amber-900 dark:hover:bg-amber-800 text-amber-900 dark:text-amber-100 transition cursor-pointer"
+            >
+              Exit Demo
+            </button>
           </div>
         </div>
       )}
@@ -50,7 +60,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo & Tagline */}
           <div className="flex items-center gap-3">
-            <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-2 group">
+            <Link to={showAuthNav ? "/dashboard" : "/"} className="flex items-center gap-2 group">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 text-white flex items-center justify-center shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
                 <HeartHandshake className="w-5 h-5" />
               </div>
@@ -72,7 +82,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Desktop Navigation Links */}
-          {isAuthenticated ? (
+          {showAuthNav ? (
             <nav className="hidden lg:flex items-center space-x-1">
               {navLinks.map((item) => {
                 const Icon = item.icon;
@@ -169,7 +179,7 @@ export const Navbar: React.FC = () => {
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pt-2 pb-4 space-y-1 shadow-lg">
-          {isAuthenticated ? (
+          {showAuthNav ? (
             <>
               <div className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                 Logged in as {user?.full_name}

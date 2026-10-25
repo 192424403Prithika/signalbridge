@@ -23,7 +23,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('signalbridge_token'));
+  const [token, setToken] = useState<string | null>(() => {
+    const isExplicitDemo = sessionStorage.getItem('signalbridge_demo_active') === 'true';
+    if (isExplicitDemo) {
+      return sessionStorage.getItem('signalbridge_demo_token');
+    }
+    return localStorage.getItem('signalbridge_token');
+  });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [safetyAlert, setSafetyAlert] = useState<string | null>(null);
 
@@ -47,17 +53,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const toggleDarkMode = () => setDarkMode(prev => !prev);
 
   const fetchCurrentUser = async () => {
-    if (!token) {
+    const isExplicitDemo = sessionStorage.getItem('signalbridge_demo_active') === 'true';
+    const localToken = localStorage.getItem('signalbridge_token');
+    const demoToken = sessionStorage.getItem('signalbridge_demo_token');
+
+    // If on landing page and not actively in an explicit demo exploration, clear demo tokens
+    if (window.location.pathname === '/' && !isExplicitDemo) {
+      sessionStorage.removeItem('signalbridge_demo_token');
+      sessionStorage.removeItem('signalbridge_demo_active');
+    }
+
+    const currentToken = localToken || (isExplicitDemo ? demoToken : null);
+    if (!currentToken) {
       setUser(null);
       setIsLoading(false);
       return;
     }
     try {
       const userData = await api.getMe();
+      // If it's a demo account but user didn't explicitly click demo or is on '/', clean it up
+      if ((userData.role === 'guest' || userData.email === 'demo@signalbridge.health') && !isExplicitDemo) {
+        localStorage.removeItem('signalbridge_token');
+        sessionStorage.removeItem('signalbridge_demo_token');
+        sessionStorage.removeItem('signalbridge_demo_active');
+        setUser(null);
+        setToken(null);
+        setIsLoading(false);
+        return;
+      }
       setUser(userData);
     } catch (err) {
       console.warn('Session expired or invalid, logging out', err);
       localStorage.removeItem('signalbridge_token');
+      sessionStorage.removeItem('signalbridge_demo_token');
+      sessionStorage.removeItem('signalbridge_demo_active');
       setToken(null);
       setUser(null);
     } finally {
@@ -72,6 +101,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (credentials: any) => {
     setIsLoading(true);
     try {
+      sessionStorage.removeItem('signalbridge_demo_token');
+      sessionStorage.removeItem('signalbridge_demo_active');
       const res = await api.login(credentials);
       localStorage.setItem('signalbridge_token', res.access_token);
       setToken(res.access_token);
@@ -85,7 +116,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const res = await api.demoLogin();
-      localStorage.setItem('signalbridge_token', res.access_token);
+      sessionStorage.setItem('signalbridge_demo_token', res.access_token);
+      sessionStorage.setItem('signalbridge_demo_active', 'true');
       setToken(res.access_token);
       setUser(res.user);
     } finally {
@@ -96,6 +128,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (userData: any) => {
     setIsLoading(true);
     try {
+      sessionStorage.removeItem('signalbridge_demo_token');
+      sessionStorage.removeItem('signalbridge_demo_active');
       const res = await api.signup(userData);
       localStorage.setItem('signalbridge_token', res.access_token);
       setToken(res.access_token);
@@ -107,6 +141,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem('signalbridge_token');
+    sessionStorage.removeItem('signalbridge_demo_token');
+    sessionStorage.removeItem('signalbridge_demo_active');
     setToken(null);
     setUser(null);
     setSafetyAlert(null);
