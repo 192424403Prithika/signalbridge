@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: signalbridge-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=signalbridge_super_secure_secret_key_change_in_prod_2026
+      - DATABASE_URL=sqlite:///./signalbridge.db
+      - ACCESS_TOKEN_EXPIRE_MINUTES=10080
+    volumes:
+      - ./backend/signalbridge.db:/app/signalbridge.db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: signalbridge-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

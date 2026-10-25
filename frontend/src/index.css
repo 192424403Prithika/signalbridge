@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #fdf4f5;
+  --color-brand-100: #fbe8eb;
+  --color-brand-200: #f7d5d9;
+  --color-brand-300: #f0b4bd;
+  --color-brand-400: #e58797;
+  --color-brand-500: #d75f75;
+  --color-brand-600: #c2425b;
+  --color-brand-700: #a33148;
+  --color-brand-800: #872b3e;
+  --color-brand-900: #732738;
+  --color-brand-950: #40111c;
+
+  --color-plum-50: #faf5ff;
+  --color-plum-100: #f3e8ff;
+  --color-plum-200: #e9d5ff;
+  --color-plum-300: #d8b4fe;
+  --color-plum-400: #c084fc;
+  --color-plum-500: #a855f7;
+  --color-plum-600: #9333ea;
+  --color-plum-700: #7e22ce;
+  --color-plum-800: #6b21a8;
+  --color-plum-900: #581c87;
+
+  --color-sage-50: #f4f7f5;
+  --color-sage-100: #e5ede8;
+  --color-sage-200: #ceddd2;
+  --color-sage-300: #aac4b3;
+  --color-sage-400: #80a58d;
+  --color-sage-500: #618a70;
+  --color-sage-600: #4c6f58;
+  --color-sage-700: #3d5847;
+  --color-sage-800: #34473b;
+  --color-sage-900: #2b3b32;
+}
+
+@layer base {
+  body {
+    background-color: rgb(248 250 252);
+    color: rgb(30 41 59);
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .dark body {
+    background-color: rgb(2 6 23);
+    color: rgb(241 245 249);
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background-color: #334155;
+}
+
+/* Print styles for consultation report */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .page-break {
+    page-break-after: always;
+  }
+}
