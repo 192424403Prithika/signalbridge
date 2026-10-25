@@ -37,4 +37,5 @@ services:
         fromService:
           type: web
           name: signalbridge-backend
-          property: url
+          property: host
+
