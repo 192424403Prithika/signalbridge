@@ -1,14 +1,68 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   HeartHandshake, ShieldCheck, BarChart3, FileText, Sparkles,
-  ArrowRight, Lock, Eye, AlertCircle, Calendar, Clock
+  ArrowRight, Lock, Eye, AlertCircle, Calendar, Clock,
+  Pause, Play
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const LandingPage: React.FC = () => {
   const { loginDemo, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  // Video playback state
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+
+  // Dynamic Animated Text states
+  const rotatingPhrases = [
+    'Evidence-Backed Insights',
+    'Clear Clinical Timelines',
+    'Doctor-Ready Summaries',
+    'Empowered Conversations',
+    'Actionable Health Patterns'
+  ];
+  const [phraseIndex, setPhraseIndex] = useState<number>(0);
+  const [displayText, setDisplayText] = useState<string>('');
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [typingSpeed, setTypingSpeed] = useState<number>(90);
+
+  // Typewriter effect loop
+  useEffect(() => {
+    const currentPhrase = rotatingPhrases[phraseIndex];
+    let timer: any;
+
+    if (!isDeleting && displayText === currentPhrase) {
+      timer = setTimeout(() => {
+        setIsDeleting(true);
+        setTypingSpeed(45);
+      }, 2400);
+    } else if (isDeleting && displayText === '') {
+      setIsDeleting(false);
+      setPhraseIndex((prev) => (prev + 1) % rotatingPhrases.length);
+      setTypingSpeed(90);
+    } else {
+      timer = setTimeout(() => {
+        const nextText = isDeleting
+          ? currentPhrase.substring(0, displayText.length - 1)
+          : currentPhrase.substring(0, displayText.length + 1);
+        setDisplayText(nextText);
+      }, typingSpeed);
+    }
+
+    return () => clearTimeout(timer);
+  }, [displayText, isDeleting, phraseIndex, typingSpeed]);
+
+  const toggleVideoPlayback = () => {
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
 
   const handleDemoClick = async () => {
     try {
@@ -21,19 +75,65 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="space-y-16 pb-20">
-      {/* Hero Section */}
+      {/* Hero Section with Cinematic Background Video */}
       <section className="relative overflow-hidden pt-12 sm:pt-20 pb-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-8">
+        {/* Background Video Layer */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none -z-10">
+          <video
+            ref={videoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster="/videos/hero-poster.jpg"
+            className="w-full h-full object-cover opacity-45 dark:opacity-25 filter blur-[0.5px] scale-105 transition-opacity duration-1000"
+          >
+            <source src="/videos/hero-bg.webm" type="video/webm" />
+            <source src="/videos/hero-bg.mp4" type="video/mp4" />
+          </video>
+
+          {/* Calming dual-tone gradient overlays for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-50/85 via-slate-50/75 to-slate-50 dark:from-slate-950/85 dark:via-slate-950/80 dark:to-slate-950" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-200/35 via-plum-100/15 to-transparent dark:from-brand-900/30 dark:via-plum-950/20 dark:to-transparent" />
+        </div>
+
+        {/* Video Play/Pause toggle pill button for user control & accessibility */}
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
+          <button
+            type="button"
+            onClick={toggleVideoPlayback}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/70 dark:border-slate-800/70 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 transition shadow-xs cursor-pointer"
+            title={isPlaying ? "Pause background video" : "Play background video"}
+          >
+            {isPlaying ? (
+              <>
+                <Pause className="w-3 h-3 text-brand-600 dark:text-brand-400" />
+                <span className="hidden sm:inline">Pause Video</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3 h-3 text-brand-600 dark:text-brand-400" />
+                <span className="hidden sm:inline">Play Video</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-8 relative z-10">
           {/* Evidence-First Pill */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 dark:bg-brand-950/80 border border-brand-200 dark:border-brand-800 text-brand-700 dark:text-brand-300 text-xs font-semibold shadow-xs">
-            <ShieldCheck className="w-4 h-4 text-brand-600" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-brand-950/80 backdrop-blur-sm border border-brand-200 dark:border-brand-800 text-brand-700 dark:text-brand-300 text-xs font-semibold shadow-xs animate-float-gentle">
+            <ShieldCheck className="w-4 h-4 text-brand-600 dark:text-brand-400" />
             <span>Evidence-First &bull; Strict Non-Diagnostic Principles</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.15]">
-            Turning Women’s Health Experiences into{' '}
-            <span className="bg-gradient-to-r from-brand-600 via-brand-500 to-plum-600 dark:from-brand-400 dark:to-plum-300 bg-clip-text text-transparent">
-              Evidence-Backed Insights
+          {/* Animated Hero Headline with Typewriter Text */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.15] min-h-[140px] sm:min-h-[160px] lg:min-h-[180px] flex flex-col justify-center">
+            <span>Turning Women’s Health Experiences into</span>
+            <span className="inline-block mt-2">
+              <span className="bg-gradient-to-r from-brand-600 via-rose-500 to-plum-600 dark:from-brand-400 dark:via-rose-300 dark:to-plum-300 bg-clip-text text-transparent animate-gradient-flow font-black tracking-tight">
+                {displayText || 'Evidence-Backed Insights'}
+              </span>
+              <span className="inline-block w-1 sm:w-1.5 h-8 sm:h-10 lg:h-12 ml-1.5 align-middle bg-brand-500 dark:bg-brand-400 animate-cursor-blink rounded-sm"></span>
             </span>
           </h1>
 
@@ -46,7 +146,7 @@ export const LandingPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <Link
               to="/signup"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-md shadow-brand-600/20 hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-md shadow-brand-600/20 hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
             >
               <span>Create Free Account</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -55,15 +155,15 @@ export const LandingPage: React.FC = () => {
             <button
               onClick={handleDemoClick}
               disabled={isLoading}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-semibold text-sm border border-slate-300 dark:border-slate-700 shadow-xs transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-semibold text-sm border border-slate-300 dark:border-slate-700 shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Eye className="w-4 h-4 text-brand-600" />
+              <Eye className="w-4 h-4 text-brand-600 dark:text-brand-400" />
               <span>{isLoading ? 'Loading Demo...' : 'Explore 90-Day Demo'}</span>
             </button>
           </div>
 
           {/* Prominent Mandatory Non-Diagnostic Disclaimer */}
-          <div className="max-w-3xl mx-auto p-4 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 text-xs sm:text-sm text-left flex items-start gap-3">
+          <div className="max-w-3xl mx-auto p-4 rounded-xl bg-amber-50/90 dark:bg-amber-950/60 backdrop-blur-sm border border-amber-200/80 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 text-xs sm:text-sm text-left flex items-start gap-3 shadow-xs">
             <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <div>
               <span className="font-semibold">Core Non-Diagnostic Disclosure: </span>
