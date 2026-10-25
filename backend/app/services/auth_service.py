@@ -71,7 +71,28 @@ def get_current_user(
         
     user = db.query(User).filter(User.email == email).first()
     if user is None:
-        raise credentials_exception
+        from app.services.mongo_service import find_mongo_user
+        from app.models import HealthProfile
+        m_user = find_mongo_user(email)
+        if m_user:
+            user = User(
+                email=m_user["email"],
+                hashed_password=m_user["hashed_password"],
+                full_name=m_user.get("full_name", m_user["email"].split("@")[0]),
+                role=m_user.get("role", "user"),
+                is_active=m_user.get("is_active", True),
+                email_verified=m_user.get("email_verified", False),
+                ai_consent=m_user.get("ai_consent", False),
+                privacy_settings_json=m_user.get("privacy_settings_json", "{}")
+            )
+            db.add(user)
+            db.flush()
+            profile = HealthProfile(user_id=user.id, consent_acknowledged=True)
+            db.add(profile)
+            db.commit()
+            db.refresh(user)
+        else:
+            raise credentials_exception
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user account")
     return user

@@ -7,6 +7,7 @@ from app.schemas import UserCreate, UserLogin, Token, PasswordChange, PrivacySet
 from app.services.auth_service import (
     verify_password, get_password_hash, create_access_token, get_current_user, log_audit_event
 )
+from app.services.mongo_service import save_mongo_user, find_mongo_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -44,6 +45,18 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)):
     db.add(profile)
     db.commit()
 
+    # Save to MongoDB Atlas for cloud persistence
+    save_mongo_user({
+        "email": user.email,
+        "hashed_password": user.hashed_password,
+        "full_name": user.full_name,
+        "role": user.role,
+        "is_active": user.is_active,
+        "email_verified": user.email_verified,
+        "ai_consent": user.ai_consent,
+        "privacy_settings_json": user.privacy_settings_json
+    })
+
     log_audit_event(db, user.id, "USER_SIGNUP", "User", user.id)
 
     access_token = create_access_token({"sub": user.email, "role": user.role})
@@ -62,6 +75,27 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=Token)
 def login(login_data: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == login_data.email).first()
+    if not user:
+        # Check if user exists in MongoDB Atlas and restore
+        m_user = find_mongo_user(login_data.email)
+        if m_user:
+            user = User(
+                email=m_user["email"],
+                hashed_password=m_user["hashed_password"],
+                full_name=m_user.get("full_name", m_user["email"].split("@")[0]),
+                role=m_user.get("role", "user"),
+                is_active=m_user.get("is_active", True),
+                email_verified=m_user.get("email_verified", False),
+                ai_consent=m_user.get("ai_consent", False),
+                privacy_settings_json=m_user.get("privacy_settings_json", "{}")
+            )
+            db.add(user)
+            db.flush()
+            profile = HealthProfile(user_id=user.id, consent_acknowledged=True)
+            db.add(profile)
+            db.commit()
+            db.refresh(user)
+
     if not user or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./signalbridge.db")
+    MONGODB_URI: str = os.getenv("MONGODB_URI", "")
     
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = [

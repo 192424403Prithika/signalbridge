@@ -13,9 +13,9 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        fromDatabase:
-          name: signalbridge-db
-          property: connectionString
+        value: sqlite:///./signalbridge.db
+      - key: MONGODB_URI
+        value: mongodb+srv://192424403simats_db_user:26N39ggJibgIYVEL@cluster0.3xda1lj.mongodb.net/signalbridge?retryWrites=true&w=majority
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "10080"
       - key: PYTHON_VERSION
@@ -39,9 +39,3 @@ services:
           type: web
           name: signalbridge-backend
           property: host
-
-databases:
-  - name: signalbridge-db
-    plan: free
-    databaseName: signalbridge
-    user: signalbridge_user
