@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   HeartHandshake, ShieldCheck, BarChart3, FileText, Sparkles,
-  ArrowRight, CheckCircle2, Lock, Eye, AlertCircle, Calendar, Clock
+  ArrowRight, Lock, Eye, AlertCircle, Calendar, Clock
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -73,64 +73,6 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* The Problem & Solution Cards */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-            <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold text-sm">
-              Problem
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-              The Consultation Communication Gap
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              When symptoms are episodic—like migraine, pelvic pain, bloating, or fatigue—appointments often feel rushed.
-              Patients are forced to recall severity from memory, temporal context is lost, and clinicians receive incomplete snapshots rather than longitudinal patterns.
-            </p>
-            <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400 pt-2">
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                Difficulty demonstrating symptom frequency across cycle phases
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                Subjective memory bias during 15-minute clinical visits
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                Diagnostic delays averaging years for conditions like endometriosis or PCOS
-              </li>
-            </ul>
-          </div>
-
-          <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-brand-200/80 dark:border-brand-900/60 shadow-sm space-y-4">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm">
-              Solution
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-              Evidence-First Health Journaling
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              SignalBridge replaces guesswork with verifiable data. Log structured records or natural language notes,
-              audit data completeness, observe mathematical frequencies, and generate doctor-ready consultation reports in one click.
-            </p>
-            <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400 pt-2">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                Traceable source entries behind every chart and trend
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                Data Quality Center catches missing ratings, reversed dates & gaps
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                Printable HTML and PDF reports structured for clinical consultation
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
 
       {/* Core Product Pillars */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
