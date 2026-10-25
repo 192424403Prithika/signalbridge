@@ -124,12 +124,17 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-2">
             {/* Dark mode toggle */}
             <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleDarkMode();
+              }}
+              className="p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               aria-label="Toggle dark mode"
               title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
             >
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600 dark:text-slate-400" />}
             </button>
 
             {isAuthenticated && (
@@ -222,11 +227,23 @@ export const Navbar: React.FC = () => {
                   </Link>
                 )}
                 <button
+                  type="button"
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   Log Out
+                </button>
+              </div>
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between px-3 py-2">
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Theme</span>
+                <button
+                  type="button"
+                  onClick={toggleDarkMode}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer"
+                >
+                  {darkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />}
+                  <span>{darkMode ? 'Dark Mode' : 'Light Mode'}</span>
                 </button>
               </div>
             </>
@@ -246,6 +263,17 @@ export const Navbar: React.FC = () => {
               >
                 Create Account
               </Link>
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between px-3 py-2">
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Theme</span>
+                <button
+                  type="button"
+                  onClick={toggleDarkMode}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer"
+                >
+                  {darkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />}
+                  <span>{darkMode ? 'Dark Mode' : 'Light Mode'}</span>
+                </button>
+              </div>
             </div>
           )}
         </div>

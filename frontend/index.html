@@ -6,6 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SignalBridge | Evidence-Backed Women's Health Symptom Journal & Consultation Reports</title>
     <meta name="description" content="SignalBridge helps women record health symptoms, organize personal timelines, identify transparent data patterns, and generate consultation-ready clinician reports. Non-diagnostic, evidence-first." />
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('signalbridge_theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body class="bg-slate-50 dark:bg-slate-950 font-sans antialiased text-slate-800 dark:text-slate-100">
     <div id="root"></div>

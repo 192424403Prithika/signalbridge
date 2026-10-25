@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
   Settings, Lock, ShieldCheck, Download, Trash2, CheckCircle2,
-  AlertCircle, History, Sparkles, User, Bell, ExternalLink
+  AlertCircle, History, Sparkles, User, Bell, ExternalLink,
+  Moon, Sun
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { HealthProfile } from '../types';
 
 export const SettingsPage: React.FC = () => {
-  const { user, refreshUser, logout } = useAuth();
+  const { user, refreshUser, logout, darkMode, toggleDarkMode } = useAuth();
 
   const [profile, setProfile] = useState<HealthProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -141,6 +142,72 @@ export const SettingsPage: React.FC = () => {
           <span>{feedback.text}</span>
         </div>
       )}
+
+      {/* Appearance & Theme Section */}
+      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              {darkMode ? <Moon className="w-4 h-4 text-amber-400" /> : <Sun className="w-4 h-4 text-brand-600" />}
+              Appearance & Theme
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Customize your interface display preference.
+            </p>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+            Current: {darkMode ? '🌙 Dark Mode' : '☀️ Light Mode'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 pt-2">
+          <button
+            type="button"
+            onClick={() => { if (darkMode) toggleDarkMode(); }}
+            className={`p-4 rounded-xl border flex flex-col items-center gap-2.5 transition text-center cursor-pointer ${
+              !darkMode
+                ? 'border-brand-500 bg-brand-50/70 dark:bg-brand-950/40 text-brand-900 dark:text-brand-200 font-bold ring-2 ring-brand-500/30'
+                : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+            }`}
+          >
+            <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center shadow-xs">
+              <Sun className="w-5 h-5 text-amber-500" />
+            </div>
+            <div>
+              <span className="text-xs font-bold block">Light Theme</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">Crisp, high-contrast light mode</span>
+            </div>
+            {!darkMode && (
+              <span className="text-[10px] font-semibold bg-brand-200 dark:bg-brand-900 text-brand-800 dark:text-brand-200 px-2 py-0.5 rounded-full">
+                Active
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { if (!darkMode) toggleDarkMode(); }}
+            className={`p-4 rounded-xl border flex flex-col items-center gap-2.5 transition text-center cursor-pointer ${
+              darkMode
+                ? 'border-brand-500 bg-brand-950/70 text-brand-200 font-bold ring-2 ring-brand-500/30'
+                : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+            }`}
+          >
+            <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center shadow-xs">
+              <Moon className="w-5 h-5 text-amber-400" />
+            </div>
+            <div>
+              <span className="text-xs font-bold block">Dark Theme</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">Sleek dark mode easy on eyes</span>
+            </div>
+            {darkMode && (
+              <span className="text-[10px] font-semibold bg-brand-900 text-brand-200 px-2 py-0.5 rounded-full">
+                Active
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
 
       {/* 1. Profile Management */}
       <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">

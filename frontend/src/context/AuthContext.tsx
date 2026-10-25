@@ -41,11 +41,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
+    const root = document.documentElement;
+    const body = document.body;
     if (darkMode) {
-      document.documentElement.classList.add('dark');
+      root.classList.add('dark');
+      root.setAttribute('data-theme', 'dark');
+      if (body) body.classList.add('dark');
       localStorage.setItem('signalbridge_theme', 'dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.remove('dark');
+      root.setAttribute('data-theme', 'light');
+      if (body) body.classList.remove('dark');
       localStorage.setItem('signalbridge_theme', 'light');
     }
   }, [darkMode]);
