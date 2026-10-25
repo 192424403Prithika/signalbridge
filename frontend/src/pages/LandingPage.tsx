@@ -1,19 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   HeartHandshake, ShieldCheck, BarChart3, FileText, Sparkles,
-  ArrowRight, Lock, Eye, AlertCircle, Calendar, Clock,
-  Pause, Play
+  ArrowRight, Lock, Eye, AlertCircle, Calendar, Clock
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const LandingPage: React.FC = () => {
   const { loginDemo, isLoading } = useAuth();
   const navigate = useNavigate();
-
-  // Video playback state
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState<boolean>(true);
 
   // Dynamic Animated Text states
   const rotatingPhrases = [
@@ -54,16 +49,6 @@ export const LandingPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [displayText, isDeleting, phraseIndex, typingSpeed]);
 
-  const toggleVideoPlayback = () => {
-    if (!videoRef.current) return;
-    if (isPlaying) {
-      videoRef.current.pause();
-    } else {
-      videoRef.current.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
   const handleDemoClick = async () => {
     try {
       await loginDemo();
@@ -75,48 +60,24 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="space-y-16 pb-20">
-      {/* Hero Section with Cinematic Background Video */}
+      {/* Hero Section with Mild Ambient Background Video */}
       <section className="relative overflow-hidden pt-12 sm:pt-20 pb-16">
-        {/* Background Video Layer */}
+        {/* Mild Ambient Background Video Layer */}
         <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none -z-10">
           <video
-            ref={videoRef}
             autoPlay
             loop
             muted
             playsInline
             poster="/videos/hero-poster.jpg"
-            className="w-full h-full object-cover opacity-45 dark:opacity-25 filter blur-[0.5px] scale-105 transition-opacity duration-1000"
+            className="w-full h-full object-cover opacity-35 dark:opacity-20 filter blur-[0.5px] scale-105 transition-opacity duration-1000"
           >
-            <source src="/videos/hero-bg.webm" type="video/webm" />
             <source src="/videos/hero-bg.mp4" type="video/mp4" />
           </video>
 
-          {/* Calming dual-tone gradient overlays for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-50/85 via-slate-50/75 to-slate-50 dark:from-slate-950/85 dark:via-slate-950/80 dark:to-slate-950" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-200/35 via-plum-100/15 to-transparent dark:from-brand-900/30 dark:via-plum-950/20 dark:to-transparent" />
-        </div>
-
-        {/* Video Play/Pause toggle pill button for user control & accessibility */}
-        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
-          <button
-            type="button"
-            onClick={toggleVideoPlayback}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/70 dark:border-slate-800/70 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 transition shadow-xs cursor-pointer"
-            title={isPlaying ? "Pause background video" : "Play background video"}
-          >
-            {isPlaying ? (
-              <>
-                <Pause className="w-3 h-3 text-brand-600 dark:text-brand-400" />
-                <span className="hidden sm:inline">Pause Video</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-3 h-3 text-brand-600 dark:text-brand-400" />
-                <span className="hidden sm:inline">Play Video</span>
-              </>
-            )}
-          </button>
+          {/* Gentle translucent atmospheric gradient overlays ensuring crystal-clear text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-50/80 via-slate-50/70 to-slate-50 dark:from-slate-950/80 dark:via-slate-950/75 dark:to-slate-950" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-100/30 via-plum-100/10 to-transparent dark:from-brand-950/40 dark:via-plum-950/20 dark:to-transparent" />
         </div>
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-8 relative z-10">
