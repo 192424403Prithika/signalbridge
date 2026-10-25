@@ -197,7 +197,7 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({
                           </td>
                           <td className="px-3 py-1.5">
                             <span className="font-semibold text-brand-700 dark:text-brand-300">
-                              {rec.severity !== undefined && rec.severity !== null ? `${rec.severity}/10` : 'None'}
+                              {rec.severity !== undefined && rec.severity !== null ? `${rec.severity}/10` : 'Unrated'}
                             </span>
                           </td>
                           <td className="px-3 py-1.5 text-slate-500">

@@ -152,7 +152,7 @@ def create_entry(
         privacy_category=entry_in.privacy_category,
         cycle_phase=entry_in.cycle_phase,
         edit_history_json=json.dumps([{
-            "timestamp": datetime.datetime.utcnow().isoformat(),
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "action": "created",
             "source": entry_in.source_type
         }])
@@ -267,7 +267,7 @@ def update_entry(
     except Exception:
         pass
     history.append({
-        "timestamp": datetime.datetime.utcnow().isoformat(),
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "action": "updated",
         "previous_state": old_state
     })

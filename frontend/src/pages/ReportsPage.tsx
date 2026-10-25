@@ -47,8 +47,17 @@ export const ReportsPage: React.FC = () => {
     fetchReports();
   }, []);
 
+  const [generateError, setGenerateError] = useState<string | null>(null);
+
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
+    setGenerateError(null);
+
+    if (startDate > endDate) {
+      setGenerateError('Start date cannot be after end date.');
+      return;
+    }
+
     setGenerating(true);
     try {
       const newReport = await api.generateReport({
@@ -64,8 +73,9 @@ export const ReportsPage: React.FC = () => {
       setShowGenerateModal(false);
       setPreviewReport(newReport);
       fetchReports();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to generate report', err);
+      setGenerateError(err?.message || 'Failed to generate report. Please verify date range and connection.');
     } finally {
       setGenerating(false);
     }
@@ -242,17 +252,19 @@ export const ReportsPage: React.FC = () => {
                     <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
                       <span className="text-[10px] text-slate-400 font-semibold block uppercase">Average Severity</span>
                       <span className="text-base font-bold text-slate-900 dark:text-white">
-                        {previewReport.generated_content?.severity_metrics?.average !== undefined
+                        {previewReport.generated_content?.severity_metrics?.average !== undefined &&
+                        previewReport.generated_content?.severity_metrics?.average !== null
                           ? `${previewReport.generated_content.severity_metrics.average}/10`
-                          : 'N/A'}
+                          : 'Not available yet'}
                       </span>
                     </div>
                     <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
                       <span className="text-[10px] text-slate-400 font-semibold block uppercase">Peak Severity</span>
                       <span className="text-base font-bold text-rose-600">
-                        {previewReport.generated_content?.severity_metrics?.max !== undefined
+                        {previewReport.generated_content?.severity_metrics?.max !== undefined &&
+                        previewReport.generated_content?.severity_metrics?.max !== null
                           ? `${previewReport.generated_content.severity_metrics.max}/10`
-                          : 'None'}
+                          : 'Not recorded'}
                       </span>
                     </div>
                     <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
@@ -316,6 +328,12 @@ export const ReportsPage: React.FC = () => {
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Configure Consultation Report
             </h3>
+
+            {generateError && (
+              <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs">
+                {generateError}
+              </div>
+            )}
 
             <form onSubmit={handleGenerate} className="space-y-4">
               <div>

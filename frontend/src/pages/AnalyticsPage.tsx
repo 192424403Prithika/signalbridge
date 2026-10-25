@@ -185,6 +185,26 @@ export const AnalyticsPage: React.FC = () => {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+
+              {/* Accessible Plain-Language Chart Summary (Requirement 11C) */}
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
+                <span className="font-semibold block text-slate-800 dark:text-slate-200">
+                  Accessible Chart Summary:
+                </span>
+                {overview.symptom_frequency.length > 0 ? (
+                  <p>
+                    Most frequent:{' '}
+                    <strong>{overview.symptom_frequency[0].symptom_name}</strong> on{' '}
+                    {overview.symptom_frequency[0].distinct_days_count} distinct days (
+                    {overview.symptom_frequency[0].frequency_percentage}% of period) across{' '}
+                    {overview.symptom_frequency[0].total_records_count} logs.
+                    {overview.symptom_frequency.length > 1 &&
+                      ` Followed by ${overview.symptom_frequency[1].symptom_name} (${overview.symptom_frequency[1].distinct_days_count} days).`}
+                  </p>
+                ) : (
+                  <p>No symptom entries logged for the selected period.</p>
+                )}
+              </div>
             </div>
 
             {/* Chart 2: Severity Summary & Metrics */}
@@ -219,24 +239,30 @@ export const AnalyticsPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Metric Callouts */}
+              {/* Metric Callouts - Handled Explicitly for Null & Zero */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
                 <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
                   <span className="text-[10px] text-slate-400 uppercase font-semibold block">Average Severity</span>
                   <span className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                    {overview.severity_metrics.average !== undefined ? `${overview.severity_metrics.average}/10` : 'N/A'}
+                    {overview.severity_metrics.average !== null && overview.severity_metrics.average !== undefined
+                      ? `${overview.severity_metrics.average}/10`
+                      : 'Not available yet'}
                   </span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
                   <span className="text-[10px] text-slate-400 uppercase font-semibold block">Median Severity</span>
                   <span className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                    {overview.severity_metrics.median !== undefined ? `${overview.severity_metrics.median}/10` : 'N/A'}
+                    {overview.severity_metrics.median !== null && overview.severity_metrics.median !== undefined
+                      ? `${overview.severity_metrics.median}/10`
+                      : 'Not available yet'}
                   </span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
                   <span className="text-[10px] text-slate-400 uppercase font-semibold block">Peak Recorded</span>
                   <span className="text-xl font-bold text-rose-600 dark:text-rose-400">
-                    {overview.severity_metrics.max !== undefined ? `${overview.severity_metrics.max}/10` : 'None'}
+                    {overview.severity_metrics.max !== null && overview.severity_metrics.max !== undefined
+                      ? `${overview.severity_metrics.max}/10`
+                      : 'None'}
                   </span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
@@ -306,9 +332,10 @@ export const AnalyticsPage: React.FC = () => {
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
                   <span className="text-[10px] text-slate-400 font-semibold block uppercase">Current Period</span>
                   <div className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                    {overview.period_comparison.period1_avg_severity !== undefined
+                    {overview.period_comparison.period1_avg_severity !== null &&
+                    overview.period_comparison.period1_avg_severity !== undefined
                       ? `${overview.period_comparison.period1_avg_severity}/10`
-                      : 'N/A'}
+                      : 'Not available yet'}
                   </div>
                   <span className="text-[11px] text-slate-500">
                     {overview.period_comparison.period1_records} records logged
@@ -318,9 +345,10 @@ export const AnalyticsPage: React.FC = () => {
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
                   <span className="text-[10px] text-slate-400 font-semibold block uppercase">Preceding Window</span>
                   <div className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                    {overview.period_comparison.period2_avg_severity !== undefined
+                    {overview.period_comparison.period2_avg_severity !== null &&
+                    overview.period_comparison.period2_avg_severity !== undefined
                       ? `${overview.period_comparison.period2_avg_severity}/10`
-                      : 'N/A'}
+                      : 'Not available yet'}
                   </div>
                   <span className="text-[11px] text-slate-500">
                     {overview.period_comparison.period2_records} records logged
@@ -391,6 +419,8 @@ export const AnalyticsPage: React.FC = () => {
                       className={`p-4 rounded-xl border text-xs space-y-2 ${
                         flare.status === 'detected'
                           ? 'bg-amber-50/70 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-950 dark:text-amber-100'
+                          : flare.status === 'no_flare_up'
+                          ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-900/40 text-emerald-950 dark:text-emerald-100'
                           : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
                       }`}
                     >
@@ -399,9 +429,15 @@ export const AnalyticsPage: React.FC = () => {
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                           flare.status === 'detected'
                             ? 'bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-100'
+                            : flare.status === 'no_flare_up'
+                            ? 'bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100'
                             : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                         }`}>
-                          {flare.status === 'detected' ? 'Cluster Detected' : 'Insufficient Baseline'}
+                          {flare.status === 'detected'
+                            ? 'Cluster Detected'
+                            : flare.status === 'no_flare_up'
+                            ? 'Stable / Baseline Maintained'
+                            : 'Insufficient Baseline'}
                         </span>
                       </div>
 
@@ -421,6 +457,17 @@ export const AnalyticsPage: React.FC = () => {
                             Rule: {flare.rule}
                           </p>
                         </>
+                      ) : flare.status === 'no_flare_up' ? (
+                        <div className="space-y-1">
+                          <p className="text-xs text-slate-600 dark:text-slate-300">
+                            {flare.message || 'No flare-up pattern detected in the evaluated period. Symptom levels remained consistent with personal baseline.'}
+                          </p>
+                          {flare.baseline_severity !== undefined && (
+                            <p className="text-[10px] text-slate-400">
+                              Established baseline severity: {flare.baseline_severity}/10 (N={flare.baseline_sample_size || 0} historical entries outside window).
+                            </p>
+                          )}
+                        </div>
                       ) : (
                         <p className="text-xs text-slate-500">
                           {flare.message || 'Requires at least 10 baseline records with severity.'}

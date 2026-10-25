@@ -80,7 +80,7 @@ class ReportGenerator:
 
         return {
             "patient_name": user_name,
-            "generated_at": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+            "generated_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
             "date_range": {"start": date_range_start, "end": date_range_end},
             "primary_concerns": primary_concerns or "General longitudinal symptom review for consultation.",
             "questions_for_clinician": questions_for_clinician or "None specified by patient.",

@@ -15,25 +15,34 @@ class DataQualityEngine:
         cycles = db.query(Cycle).filter(Cycle.user_id == user_id).all()
         reports = db.query(Report).filter(Report.user_id == user_id, Report.status == "finalized").all()
 
-        existing_open_issues = db.query(DataQualityIssue).filter(
-            DataQualityIssue.user_id == user_id,
-            DataQualityIssue.status == "open"
+        existing_issues = db.query(DataQualityIssue).filter(
+            DataQualityIssue.user_id == user_id
         ).all()
-        existing_issue_types = set(i.issue_type for i in existing_open_issues)
+        open_issues_by_type = {i.issue_type: i for i in existing_issues if i.status == "open"}
+        ignored_issue_types = set(i.issue_type for i in existing_issues if i.status == "ignored")
+        existing_issue_types = set(open_issues_by_type.keys()) | ignored_issue_types
 
         new_issues: List[DataQualityIssue] = []
 
         # 1. Missing Severity
         missing_sev_entries = [e for e in entries if e.severity is None]
-        if missing_sev_entries and "missing_severity" not in existing_issue_types:
-            new_issues.append(DataQualityIssue(
-                user_id=user_id,
-                issue_type="missing_severity",
-                severity="info",
-                description=f"{len(missing_sev_entries)} symptom entries do not have a 0–10 severity rating.",
-                affected_entry_ids=json.dumps([e.id for e in missing_sev_entries[:15]]),
-                suggested_action="Assign a severity score (0 mild to 10 severe) so analytics can track severity changes accurately."
-            ))
+        if missing_sev_entries:
+            if "missing_severity" not in open_issues_by_type and "missing_severity" not in ignored_issue_types:
+                new_issues.append(DataQualityIssue(
+                    user_id=user_id,
+                    issue_type="missing_severity",
+                    severity="info",
+                    description=f"{len(missing_sev_entries)} symptom entries do not have a 0–10 severity rating.",
+                    affected_entry_ids=json.dumps([e.id for e in missing_sev_entries[:15]]),
+                    suggested_action="Assign a severity score (0 mild to 10 severe) so analytics can track severity changes accurately."
+                ))
+            elif "missing_severity" in open_issues_by_type:
+                # Update affected count
+                open_issues_by_type["missing_severity"].description = f"{len(missing_sev_entries)} symptom entries do not have a 0–10 severity rating."
+                open_issues_by_type["missing_severity"].affected_entry_ids = json.dumps([e.id for e in missing_sev_entries[:15]])
+        elif "missing_severity" in open_issues_by_type:
+            # Auto-resolve if resolved by user
+            open_issues_by_type["missing_severity"].status = "resolved"
 
         # 2. Impossible / Reversed Dates
         reversed_date_entries = []
@@ -47,37 +56,45 @@ class DataQualityEngine:
                 except Exception:
                     pass
 
-        if reversed_date_entries and "reversed_dates" not in existing_issue_types:
-            new_issues.append(DataQualityIssue(
-                user_id=user_id,
-                issue_type="reversed_dates",
-                severity="critical",
-                description=f"{len(reversed_date_entries)} entries have an end date recorded before the onset date.",
-                affected_entry_ids=json.dumps([e.id for e in reversed_date_entries]),
-                suggested_action="Correct the onset or end date so duration calculations are mathematically valid."
-            ))
+        if reversed_date_entries:
+            if "reversed_dates" not in open_issues_by_type and "reversed_dates" not in ignored_issue_types:
+                new_issues.append(DataQualityIssue(
+                    user_id=user_id,
+                    issue_type="reversed_dates",
+                    severity="critical",
+                    description=f"{len(reversed_date_entries)} entries have an end date recorded before the onset date.",
+                    affected_entry_ids=json.dumps([e.id for e in reversed_date_entries]),
+                    suggested_action="Correct the onset or end date so duration calculations are mathematically valid."
+                ))
+        elif "reversed_dates" in open_issues_by_type:
+            open_issues_by_type["reversed_dates"].status = "resolved"
 
-        # 3. Duplicate / Near-Duplicate Entries
-        # Entries with same symptom and same onset_date
-        date_symptom_map = {}
+        # 3. Duplicate / Suspiciously Similar Entries
+        # Entries with same symptom, same onset_date, AND same onset_time (or identical content)
+        date_time_map = {}
         duplicates = []
         for e in entries:
-            key = (e.symptom_id, e.onset_date)
-            if key in date_symptom_map:
-                duplicates.extend([e.id, date_symptom_map[key]])
+            # Match identical symptom, onset_date, and onset_time
+            time_key = e.onset_time or "unspecified"
+            key = (e.symptom_id, e.onset_date, time_key)
+            if key in date_time_map:
+                duplicates.extend([e.id, date_time_map[key]])
             else:
-                date_symptom_map[key] = e.id
+                date_time_map[key] = e.id
 
-        if duplicates and "duplicate_entry" not in existing_issue_types:
+        if duplicates:
             unique_dupe_ids = list(set(duplicates))
-            new_issues.append(DataQualityIssue(
-                user_id=user_id,
-                issue_type="duplicate_entry",
-                severity="warning",
-                description=f"Found multiple logs for the same symptom on the same date ({len(unique_dupe_ids)} entries).",
-                affected_entry_ids=json.dumps(unique_dupe_ids[:10]),
-                suggested_action="Merge or delete duplicate entries if they represent the same health episode."
-            ))
+            if "duplicate_entry" not in open_issues_by_type and "duplicate_entry" not in ignored_issue_types:
+                new_issues.append(DataQualityIssue(
+                    user_id=user_id,
+                    issue_type="duplicate_entry",
+                    severity="warning",
+                    description=f"Found multiple logs for the same symptom with identical timestamps ({len(unique_dupe_ids)} entries).",
+                    affected_entry_ids=json.dumps(unique_dupe_ids[:10]),
+                    suggested_action="Review and remove true duplicate entries. Note: Repeated symptoms at different times of day are legitimate and not flagged as duplicates."
+                ))
+        elif "duplicate_entry" in open_issues_by_type:
+            open_issues_by_type["duplicate_entry"].status = "resolved"
 
         # 4. Out-of-Range Severity (> 10 or < 0)
         invalid_sev = [e for e in entries if e.severity is not None and (e.severity < 0 or e.severity > 10)]

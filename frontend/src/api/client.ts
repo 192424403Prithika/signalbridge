@@ -1,7 +1,7 @@
 import {
   User, HealthProfile, SymptomTaxonomy, SymptomEntry, ExtractedProposal,
   Medication, MedicationLog, Cycle, CyclePrediction, Insight, EvidenceDetail,
-  DataQualityIssue, Report, Appointment, AnalyticsOverview
+  DataQualityIssue, Report, Appointment, AnalyticsOverview, ConsultationReadiness
 } from '../types';
 
 let rawApiUrl = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
@@ -182,6 +182,7 @@ export const api = {
 
   getFlareUps: () => apiRequest<{ flare_ups: any[]; methodology: string }>('/analytics/flare-ups'),
   getCorrelations: () => apiRequest<{ correlations: any[]; disclaimer: string }>('/analytics/correlations'),
+  getConsultationReadiness: () => apiRequest<ConsultationReadiness>('/analytics/readiness'),
 
   // Insights & Evidence
   getInsights: () => apiRequest<Insight[]>('/insights'),

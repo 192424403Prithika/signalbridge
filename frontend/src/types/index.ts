@@ -270,6 +270,7 @@ export interface AnalyticsOverview {
     active_days?: number;
     window_average_severity?: number;
     baseline_severity?: number;
+    baseline_sample_size?: number;
     elevation?: number;
     evidence_entry_ids?: number[];
     rule?: string;
@@ -307,6 +308,7 @@ export interface AnalyticsOverview {
     current_period_average_severity?: number;
     difference?: number;
   };
+  consultation_readiness?: ConsultationReadiness;
   missing_data_summary: {
     missing_severity_entries: number;
     missing_duration_entries: number;
@@ -314,3 +316,31 @@ export interface AnalyticsOverview {
   };
   disclaimer: string;
 }
+
+export interface ConsultationChecklistItem {
+  key: string;
+  title: string;
+  is_complete: boolean;
+  status: 'complete' | 'pending';
+  available_summary: string;
+  missing_summary?: string | null;
+  target_link: string;
+  action_text: string;
+}
+
+export interface ConsultationReadiness {
+  readiness_tier: 'Well Prepared' | 'Moderate Coverage' | 'Initial Stage';
+  completeness_percentage: number;
+  completed_criteria_count: number;
+  total_criteria_count: number;
+  calculation_formula: string;
+  summary_statement: string;
+  checklist: ConsultationChecklistItem[];
+  practical_next_steps: Array<{
+    task: string;
+    link: string;
+    action_text: string;
+  }>;
+  disclaimer: string;
+}
+

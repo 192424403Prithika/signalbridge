@@ -1,6 +1,7 @@
 import io
 import csv
 import json
+import datetime
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -27,7 +28,7 @@ def export_user_data_json(db: Session = Depends(get_db), current_user: User = De
             "version": "1.0",
             "user_id": current_user.id,
             "user_email": current_user.email,
-            "exported_at": str(db.query(User).first().created_at.now())
+            "exported_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
         },
         "profile": {
             "preferred_name": profile.preferred_name if profile else None,
